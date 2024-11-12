@@ -9,15 +9,43 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             font-family: Arial, sans-serif;
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             background-color: #f0f0f0;
             transition: background-image 0.5s ease-in-out;
+        }
+
+        .home-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: #2e6ff2;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .home-link:hover {
+            transform: scale(1.1);
+        }
+
+        .home-link img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .centered-container {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .container {
@@ -91,31 +119,35 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="timer-display">
-            <svg class="progress-ring" width="200" height="200">
-                <circle class="progress-ring-circle-bg" cx="100" cy="100" r="90"/>
-                <circle class="progress-ring-circle" cx="100" cy="100" r="90"/>
-            </svg>
-            <div id="timer" class="timer">10:00</div>
-        </div>
-        <div class="controls">
-            <button onclick="adjustTimer(-60)">-1분</button>
-            <button onclick="adjustTimer(60)">+1분</button>
-            <button onclick="adjustTimer(300)">+5분</button>
-            <button onclick="adjustTimer(600)">+10분</button>
-            <button onclick="resetTimer()" class="reset-button">리셋</button>
+    <a href="https://weniv.co.kr/" class="home-link">
+        <img src="asset/img/logo.svg" alt="홈으로 가기">
+    </a>
+    <div class="centered-container">
+        <div class="container">
+            <div class="timer-display">
+                <svg class="progress-ring" width="200" height="200">
+                    <circle class="progress-ring-circle-bg" cx="100" cy="100" r="90"/>
+                    <circle class="progress-ring-circle" cx="100" cy="100" r="90"/>
+                </svg>
+                <div id="timer" class="timer">10:00</div>
+            </div>
+            <div class="controls">
+                <button onclick="adjustTimer(-60)">-1분</button>
+                <button onclick="adjustTimer(60)">+1분</button>
+                <button onclick="adjustTimer(300)">+5분</button>
+                <button onclick="adjustTimer(600)">+10분</button>
+                <button onclick="resetTimer()" class="reset-button">리셋</button>
+            </div>
         </div>
     </div>
 
     <script>
-        const DEFAULT_TIME = 600; // 10분을 초 단위로
+        const DEFAULT_TIME = 600;
         let timeLeft = DEFAULT_TIME;
         let timerId = null;
         let totalTime = DEFAULT_TIME;
         let lastBackgroundChange = Date.now();
         
-        // 원형 프로그레스 바 설정
         const circle = document.querySelector('.progress-ring-circle');
         const radius = circle.r.baseVal.value;
         const circumference = radius * 2 * Math.PI;
@@ -126,14 +158,13 @@
             const offset = circumference - (percent / 100 * circumference);
             circle.style.strokeDashoffset = offset;
             
-            // 색상 변경 로직
             let color;
             if (percent >= 60) {
-                color = '#4CAF50'; // 초록색 (60% 이상)
+                color = '#4CAF50';
             } else if (percent >= 30) {
-                color = '#FFA500'; // 주황색 (30-60%)
+                color = '#FFA500';
             } else {
-                color = '#f44336'; // 빨간색 (30% 미만)
+                color = '#f44336';
             }
             
             circle.style.stroke = color;
@@ -202,7 +233,6 @@
             }
         }
 
-        // 페이지 로드 시 초기화
         setRandomBackground();
         startTimer();
     </script>
