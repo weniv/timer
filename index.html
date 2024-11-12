@@ -80,7 +80,7 @@
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.7);
             padding: 2rem;
             border-radius: 10px;
             text-align: center;
@@ -95,6 +95,8 @@
         }
 
         .progress-ring {
+            width: 200px;
+            height: 200px;
             position: absolute;
             top: 0;
             left: 0;
@@ -124,9 +126,16 @@
             margin: 0;
         }
 
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
         .controls button {
-            margin: 0.5rem;
-            padding: 0.5rem 1rem;
+            padding: 8px 16px;
             font-size: 1rem;
             cursor: pointer;
             border: none;
@@ -147,6 +156,34 @@
         .reset-button:hover {
             background-color: #da190b !important;
         }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                max-width: 50vw;
+            }
+
+            .progress-ring {
+                width: 150px;
+                height: 150px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .timer-display {
+                max-width: 200px;
+                margin: 0;
+            }
+            
+            .timer {
+                font-size: clamp(1.5rem, 6vw, 3rem);
+            }
+
+            .controls {
+                margin-top: 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -156,7 +193,7 @@
     <div class="centered-container">
         <div class="container">
             <div class="timer-display">
-                <svg class="progress-ring" width="200" height="200">
+                <svg class="progress-ring" viewBox="0 0 200 200">
                     <circle class="progress-ring-circle-bg" cx="100" cy="100" r="90"/>
                     <circle class="progress-ring-circle" cx="100" cy="100" r="90"/>
                 </svg>
