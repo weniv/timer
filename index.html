@@ -80,6 +80,7 @@
         }
 
         .container {
+            /* position: relative; */
             background: rgba(255, 255, 255, 0.7);
             padding: 2rem;
             border-radius: 10px;
@@ -157,6 +158,66 @@
             background-color: #da190b !important;
         }
 
+        .memo-button {
+            position: absolute;
+            top: 20px;
+            right: 80px;
+            width: 40px;
+            height: 40px;
+            background-color: #2e6ff2;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .memo-button:hover {
+            transform: scale(1.1);
+        }
+
+        .memo-icon {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .memo-container {
+            display: none;
+            position: absolute;
+            top: 80px;
+            right: 80px;
+            width: 200px;
+            background: #fff9c4;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .memo-container.show {
+            display: block;
+        }
+
+        .memo-textarea {
+            width: 100%;
+            min-height: 100px;
+            border: none;
+            background: transparent;
+            resize: none;
+            font-family: inherit;
+            overflow: hidden; /* 스크롤바 제거 */
+            line-height: 1.5; /* 줄간격 설정 */
+            padding: 0;
+        }
+
+        .memo-textarea:focus {
+            outline: none;
+        }
+
         @media screen and (max-width: 768px) {
             .container {
                 max-width: 50vw;
@@ -192,6 +253,14 @@
     </a>
     <div class="centered-container">
         <div class="container">
+            <button class="memo-button" aria-label="메모 열기">
+                <svg class="memo-icon" viewBox="0 0 24 24">
+                    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/>
+                </svg>
+            </button>
+            <div class="memo-container">
+                <textarea class="memo-textarea" placeholder="memo..."></textarea>
+            </div>
             <div class="timer-display">
                 <svg class="progress-ring" viewBox="0 0 200 200">
                     <circle class="progress-ring-circle-bg" cx="100" cy="100" r="90"/>
@@ -200,11 +269,11 @@
                 <div id="timer" class="timer">10:00</div>
             </div>
             <div class="controls">
-                <button onclick="adjustTimer(-60)">-1분</button>
-                <button onclick="adjustTimer(60)">+1분</button>
-                <button onclick="adjustTimer(300)">+5분</button>
-                <button onclick="adjustTimer(600)">+10분</button>
-                <button onclick="resetTimer()" class="reset-button">리셋</button>
+                <button onclick="adjustTimer(-60)">-1m</button>
+                <button onclick="adjustTimer(60)">+1m</button>
+                <button onclick="adjustTimer(300)">+5m</button>
+                <button onclick="adjustTimer(600)">+10m</button>
+                <button onclick="resetTimer()" class="reset-button">reset</button>
             </div>
         </div>
     </div>
@@ -215,12 +284,19 @@
         let timerId = null;
         let totalTime = DEFAULT_TIME;
         let lastBackgroundChange = Date.now();
+
+        const memoButton = document.querySelector('.memo-button');
+        const memoContainer = document.querySelector('.memo-container');
         
         const circle = document.querySelector('.progress-ring-circle');
         const radius = circle.r.baseVal.value;
         const circumference = radius * 2 * Math.PI;
         circle.style.strokeDasharray = `${circumference} ${circumference}`;
         circle.style.strokeDashoffset = `${circumference}`;
+
+        memoButton.addEventListener('click', () => {
+            memoContainer.classList.toggle('show');
+        });
 
         function setProgress(percent) {
             const offset = circumference - (percent / 100 * circumference);
@@ -330,6 +406,15 @@
                 totalTime = Math.max(totalTime, timeLeft);
                 updateTimer();
             }
+        }
+
+        const textarea = document.querySelector('.memo-textarea');
+        textarea.addEventListener('input', () => autoResize(textarea));
+        function autoResize(textarea) {
+            // 최소 높이 설정
+            textarea.style.height = '100px';
+            // 스크롤 높이로 재설정
+            textarea.style.height = textarea.scrollHeight + 'px';
         }
 
         setRandomBackground();
