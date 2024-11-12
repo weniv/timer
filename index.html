@@ -3,62 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>타이머 서비스</title>
+    <title>타이머</title>
     <style>
         body {
             margin: 0;
+            padding: 0;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-size: cover;
-            background-position: center;
-            transition: background-image 1s ease-in-out;
-            color: white;
             font-family: Arial, sans-serif;
+            background-size: contain; /* cover에서 contain으로 변경 */
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #f0f0f0; /* 배경색 추가 */
+            transition: background-image 0.5s ease-in-out;
         }
-        
+
         .container {
-            background-color: rgba(0, 0, 0, 0.7);
+            background: rgba(255, 255, 255, 0.9);
             padding: 2rem;
-            border-radius: 1rem;
+            border-radius: 10px;
             text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .initial-input {
+            margin-bottom: 1rem;
         }
 
         .timer {
-            font-size: 6rem;
+            font-size: 3rem;
             margin: 1rem 0;
         }
 
         .controls button {
-            padding: 0.5rem 1rem;
             margin: 0.5rem;
+            padding: 0.5rem 1rem;
             font-size: 1rem;
             cursor: pointer;
         }
 
         .progress {
-            width: 200px;
-            height: 200px;
-            position: relative;
-            margin: 1rem auto;
+            width: 100%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            overflow: hidden;
         }
 
-        #colorPicker {
-            margin: 1rem;
-        }
-
-        .initial-input {
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-
-        .initial-input input {
-            padding: 0.5rem;
-            font-size: 1rem;
-            width: 100px;
-            margin: 0.5rem;
+        .progress-bar {
+            width: 100%;
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 1s linear;
         }
     </style>
 </head>
@@ -66,112 +64,78 @@
     <div class="container">
         <div id="initialInput" class="initial-input">
             <h2>타이머 시간 설정</h2>
-            <input type="number" id="minutes" min="1" placeholder="분">
             <button onclick="startTimer()">시작</button>
         </div>
 
         <div id="timerContainer" style="display: none;">
             <div class="progress">
-                <canvas id="progressCanvas" width="200" height="200"></canvas>
+                <div id="progressBar" class="progress-bar"></div>
             </div>
-            <div class="timer" id="timer">00:00</div>
+            <div id="timer" class="timer">00:00</div>
             <div class="controls">
-                <button onclick="adjustTime(-60)">-1분</button>
-                <button onclick="adjustTime(60)">+1분</button>
+                <button onclick="adjustTimer(-60)">-1분</button>
+                <button onclick="adjustTimer(60)">+1분</button>
             </div>
-            <input type="color" id="colorPicker" onchange="changeColor(this.value)" value="#ffffff">
         </div>
     </div>
 
     <script>
-        let totalSeconds = 0;
-        let currentSeconds = 0;
-        let timerInterval;
-        let backgroundInterval;
+        let timeLeft = 0;
+        let timerId = null;
+        let totalTime = 0;
+        let lastImageChange = 0; // 마지막 이미지 변경 시간을 추적
         
-        function startTimer() {
-            const minutes = parseInt(document.getElementById('minutes').value);
-            if (isNaN(minutes) || minutes <= 0) {
-                alert('올바른 시간을 입력해주세요.');
-                return;
-            }
+        // 배경 이미지 관리
+        function setRandomBackground() {
+            const imageNumber = Math.floor(Math.random() * 15) + 1;
+            document.body.style.backgroundImage = `url(asset/img/${imageNumber}.webp)`;
+        }
 
-            totalSeconds = minutes * 60;
-            currentSeconds = totalSeconds;
+        function startTimer() {
+            if (!timeLeft) timeLeft = 300; // 기본 5분
+            totalTime = timeLeft;
             
             document.getElementById('initialInput').style.display = 'none';
             document.getElementById('timerContainer').style.display = 'block';
             
+            // 시작할 때 랜덤 배경 설정
+            setRandomBackground();
+            
             updateTimer();
-            timerInterval = setInterval(updateTimer, 1000);
-            changeBackground();
-            backgroundInterval = setInterval(changeBackground, 60000);
+            timerId = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    // 타이머 종료 시 새로운 랜덤 배경
+                    setRandomBackground();
+                }
+            }, 1000);
         }
 
         function updateTimer() {
-            if (currentSeconds <= 0) {
-                clearInterval(timerInterval);
-                clearInterval(backgroundInterval);
-                alert('타이머가 종료되었습니다!');
-                return;
-            }
-
-            const minutes = Math.floor(currentSeconds / 60);
-            const seconds = currentSeconds % 60;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
             document.getElementById('timer').textContent = 
-                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            updateProgress();
-            currentSeconds--;
+            // 프로그레스 바 업데이트
+            const progress = (timeLeft / totalTime) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
         }
 
-        function adjustTime(seconds) {
-            const newTime = currentSeconds + seconds;
+        function adjustTimer(seconds) {
+            const newTime = timeLeft + seconds;
             if (newTime > 0) {
-                currentSeconds = newTime;
-                totalSeconds = Math.max(totalSeconds, currentSeconds);
+                timeLeft = newTime;
+                totalTime = Math.max(totalTime, timeLeft);
                 updateTimer();
             }
         }
 
-        function updateProgress() {
-            const canvas = document.getElementById('progressCanvas');
-            const ctx = canvas.getContext('2d');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radius = 80;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // 배경 원
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 10;
-            ctx.stroke();
-
-            // 진행도 원
-            const progress = (totalSeconds - currentSeconds) / totalSeconds;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, -Math.PI / 2, (-Math.PI / 2) + (2 * Math.PI * progress));
-            ctx.strokeStyle = document.getElementById('colorPicker').value;
-            ctx.lineWidth = 10;
-            ctx.stroke();
-        }
-
-        function changeColor(color) {
-            document.getElementById('timer').style.color = color;
-            updateProgress();
-        }
-
-        function changeBackground() {
-            const randomNum = Math.floor(Math.random() * 15) + 1;
-            document.body.style.backgroundImage = `url('/asset/img/${randomNum}.webp')`;
-        }
-
-        // 초기 설정
-        document.getElementById('colorPicker').value = '#ffffff';
-        changeBackground();
+        // 페이지 로드 시 첫 배경 이미지 설정
+        setRandomBackground();
     </script>
 </body>
 </html>
