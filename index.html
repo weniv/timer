@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타이머 서비스</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-size: cover;
+            background-position: center;
+            transition: background-image 1s ease-in-out;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+
+        .timer {
+            font-size: 6rem;
+            margin: 1rem 0;
+        }
+
+        .controls button {
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .progress {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            margin: 1rem auto;
+        }
+
+        #colorPicker {
+            margin: 1rem;
+        }
+
+        .initial-input {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .initial-input input {
+            padding: 0.5rem;
+            font-size: 1rem;
+            width: 100px;
+            margin: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="initialInput" class="initial-input">
+            <h2>타이머 시간 설정</h2>
+            <input type="number" id="minutes" min="1" placeholder="분">
+            <button onclick="startTimer()">시작</button>
+        </div>
+
+        <div id="timerContainer" style="display: none;">
+            <div class="progress">
+                <canvas id="progressCanvas" width="200" height="200"></canvas>
+            </div>
+            <div class="timer" id="timer">00:00</div>
+            <div class="controls">
+                <button onclick="adjustTime(-60)">-1분</button>
+                <button onclick="adjustTime(60)">+1분</button>
+            </div>
+            <input type="color" id="colorPicker" onchange="changeColor(this.value)" value="#ffffff">
+        </div>
+    </div>
+
+    <script>
+        let totalSeconds = 0;
+        let currentSeconds = 0;
+        let timerInterval;
+        let backgroundInterval;
+        
+        function startTimer() {
+            const minutes = parseInt(document.getElementById('minutes').value);
+            if (isNaN(minutes) || minutes <= 0) {
+                alert('올바른 시간을 입력해주세요.');
+                return;
+            }
+
+            totalSeconds = minutes * 60;
+            currentSeconds = totalSeconds;
+            
+            document.getElementById('initialInput').style.display = 'none';
+            document.getElementById('timerContainer').style.display = 'block';
+            
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+            changeBackground();
+            backgroundInterval = setInterval(changeBackground, 60000);
+        }
+
+        function updateTimer() {
+            if (currentSeconds <= 0) {
+                clearInterval(timerInterval);
+                clearInterval(backgroundInterval);
+                alert('타이머가 종료되었습니다!');
+                return;
+            }
+
+            const minutes = Math.floor(currentSeconds / 60);
+            const seconds = currentSeconds % 60;
+            document.getElementById('timer').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            updateProgress();
+            currentSeconds--;
+        }
+
+        function adjustTime(seconds) {
+            const newTime = currentSeconds + seconds;
+            if (newTime > 0) {
+                currentSeconds = newTime;
+                totalSeconds = Math.max(totalSeconds, currentSeconds);
+                updateTimer();
+            }
+        }
+
+        function updateProgress() {
+            const canvas = document.getElementById('progressCanvas');
+            const ctx = canvas.getContext('2d');
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 80;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 배경 원
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 10;
+            ctx.stroke();
+
+            // 진행도 원
+            const progress = (totalSeconds - currentSeconds) / totalSeconds;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI / 2, (-Math.PI / 2) + (2 * Math.PI * progress));
+            ctx.strokeStyle = document.getElementById('colorPicker').value;
+            ctx.lineWidth = 10;
+            ctx.stroke();
+        }
+
+        function changeColor(color) {
+            document.getElementById('timer').style.color = color;
+            updateProgress();
+        }
+
+        function changeBackground() {
+            const randomNum = Math.floor(Math.random() * 15) + 1;
+            document.body.style.backgroundImage = `url('/asset/img/${randomNum}.webp')`;
+        }
+
+        // 초기 설정
+        document.getElementById('colorPicker').value = '#ffffff';
+        changeBackground();
+    </script>
+</body>
+</html>
