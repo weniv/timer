@@ -13,10 +13,10 @@
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
-            background-size: contain; /* cover에서 contain으로 변경 */
+            background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            background-color: #f0f0f0; /* 배경색 추가 */
+            background-color: #f0f0f0;
             transition: background-image 0.5s ease-in-out;
         }
 
@@ -28,13 +28,41 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
-        .initial-input {
-            margin-bottom: 1rem;
+        .timer-display {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1rem;
+        }
+
+        .progress-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle-bg {
+            stroke: #eee;
+            stroke-width: 8px;
+            fill: transparent;
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+            stroke: #4CAF50;
+            stroke-width: 8px;
+            fill: transparent;
         }
 
         .timer {
-            font-size: 3rem;
-            margin: 1rem 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            margin: 0;
         }
 
         .controls button {
@@ -42,76 +70,117 @@
             padding: 0.5rem 1rem;
             font-size: 1rem;
             cursor: pointer;
-        }
-
-        .progress {
-            width: 100%;
-            height: 10px;
-            background-color: #eee;
+            border: none;
             border-radius: 5px;
-            overflow: hidden;
+            background-color: #4CAF50;
+            color: white;
+            transition: background-color 0.3s;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 100%;
-            background-color: #4CAF50;
-            transition: width 1s linear;
+        .controls button:hover {
+            background-color: #45a049;
+        }
+
+        .reset-button {
+            background-color: #f44336 !important;
+        }
+
+        .reset-button:hover {
+            background-color: #da190b !important;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="initialInput" class="initial-input">
-            <h2>타이머 시간 설정</h2>
-            <button onclick="startTimer()">시작</button>
+        <div class="timer-display">
+            <svg class="progress-ring" width="200" height="200">
+                <circle class="progress-ring-circle-bg" cx="100" cy="100" r="90"/>
+                <circle class="progress-ring-circle" cx="100" cy="100" r="90"/>
+            </svg>
+            <div id="timer" class="timer">10:00</div>
         </div>
-
-        <div id="timerContainer" style="display: none;">
-            <div class="progress">
-                <div id="progressBar" class="progress-bar"></div>
-            </div>
-            <div id="timer" class="timer">00:00</div>
-            <div class="controls">
-                <button onclick="adjustTimer(-60)">-1분</button>
-                <button onclick="adjustTimer(60)">+1분</button>
-            </div>
+        <div class="controls">
+            <button onclick="adjustTimer(-60)">-1분</button>
+            <button onclick="adjustTimer(60)">+1분</button>
+            <button onclick="adjustTimer(300)">+5분</button>
+            <button onclick="adjustTimer(600)">+10분</button>
+            <button onclick="resetTimer()" class="reset-button">리셋</button>
         </div>
     </div>
 
     <script>
-        let timeLeft = 0;
+        const DEFAULT_TIME = 600; // 10분을 초 단위로
+        let timeLeft = DEFAULT_TIME;
         let timerId = null;
-        let totalTime = 0;
-        let lastImageChange = 0; // 마지막 이미지 변경 시간을 추적
+        let totalTime = DEFAULT_TIME;
+        let lastBackgroundChange = Date.now();
         
-        // 배경 이미지 관리
+        // 원형 프로그레스 바 설정
+        const circle = document.querySelector('.progress-ring-circle');
+        const radius = circle.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = `${circumference}`;
+
+        function setProgress(percent) {
+            const offset = circumference - (percent / 100 * circumference);
+            circle.style.strokeDashoffset = offset;
+            
+            // 색상 변경 로직
+            let color;
+            if (percent >= 60) {
+                color = '#4CAF50'; // 초록색 (60% 이상)
+            } else if (percent >= 30) {
+                color = '#FFA500'; // 주황색 (30-60%)
+            } else {
+                color = '#f44336'; // 빨간색 (30% 미만)
+            }
+            
+            circle.style.stroke = color;
+        }
+
         function setRandomBackground() {
             const imageNumber = Math.floor(Math.random() * 15) + 1;
             document.body.style.backgroundImage = `url(asset/img/${imageNumber}.webp)`;
+            lastBackgroundChange = Date.now();
+        }
+
+        function checkBackgroundChange() {
+            const now = Date.now();
+            if (now - lastBackgroundChange >= 60000) {
+                setRandomBackground();
+            }
         }
 
         function startTimer() {
-            if (!timeLeft) timeLeft = 300; // 기본 5분
-            totalTime = timeLeft;
-            
-            document.getElementById('initialInput').style.display = 'none';
-            document.getElementById('timerContainer').style.display = 'block';
-            
-            // 시작할 때 랜덤 배경 설정
-            setRandomBackground();
+            if (timerId) return;
             
             updateTimer();
             timerId = setInterval(() => {
                 timeLeft--;
                 updateTimer();
+                checkBackgroundChange();
                 
                 if (timeLeft <= 0) {
                     clearInterval(timerId);
-                    // 타이머 종료 시 새로운 랜덤 배경
+                    timerId = null;
                     setRandomBackground();
                 }
             }, 1000);
+        }
+
+        function resetTimer() {
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+            }
+            
+            timeLeft = DEFAULT_TIME;
+            totalTime = DEFAULT_TIME;
+            
+            updateTimer();
+            startTimer();
+            setRandomBackground();
         }
 
         function updateTimer() {
@@ -120,9 +189,8 @@
             document.getElementById('timer').textContent = 
                 `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             
-            // 프로그레스 바 업데이트
             const progress = (timeLeft / totalTime) * 100;
-            document.getElementById('progressBar').style.width = `${progress}%`;
+            setProgress(progress);
         }
 
         function adjustTimer(seconds) {
@@ -134,8 +202,9 @@
             }
         }
 
-        // 페이지 로드 시 첫 배경 이미지 설정
+        // 페이지 로드 시 초기화
         setRandomBackground();
+        startTimer();
     </script>
 </body>
 </html>
