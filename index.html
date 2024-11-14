@@ -218,6 +218,19 @@
             outline: none;
         }
 
+        .resize-handle {
+            position: absolute;
+            left: -3px;
+            top: 5%;
+            width: 5px;
+            height: 90%;
+            cursor: ew-resize;
+        }
+
+        .resize-handle:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
         @media screen and (max-width: 768px) {
             .container {
                 max-width: 50vw;
@@ -419,6 +432,47 @@
             textarea.style.height = '100px';
             // 스크롤 높이로 재설정
             textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        // 메모 리사이즈
+        // HTML에 리사이즈 핸들 요소 추가
+        const resizeHandle = document.createElement('div');
+        resizeHandle.className = 'resize-handle';
+        memoContainer.appendChild(resizeHandle);
+
+        // 리사이즈 기능 구현
+        let isResizing = false;
+        let startX;
+        let startWidth;
+        let startLeft;
+
+        resizeHandle.addEventListener('mousedown', initResize);
+        document.addEventListener('mousemove', resize);
+        document.addEventListener('mouseup', stopResize);
+
+        function initResize(e) {
+            isResizing = true;
+            startX = e.clientX;
+            startWidth = parseInt(getComputedStyle(memoContainer).width, 10);
+            startLeft = memoContainer.offsetLeft; // 현재 left 위치 저장
+        }
+
+        function resize(e) {
+            if (!isResizing) return;
+            
+            const difference = startX - e.clientX;
+            const newWidth = startWidth + difference;
+            
+            // 최소 너비 200px 설정
+            if (newWidth > 200) {
+                memoContainer.style.width = `${newWidth}px`;
+                // 왼쪽으로 리사이징할 때 위치도 조정
+                memoContainer.style.left = `${startLeft - difference}px`;
+            }
+        }
+
+        function stopResize() {
+            isResizing = false;
         }
 
         setRandomBackground();
