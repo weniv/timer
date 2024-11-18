@@ -247,13 +247,20 @@
             border: 1px solid #cccccc;
             border-radius: 4px;
             padding: 4px 8px;
-            margin-left: 5px;
+            margin-left: 2px;
             cursor: pointer;
         }
 
         .font-size-btn:hover {
             opacity: 1;
             background: #f0f0f0;
+        }
+
+        /* svg */
+        button svg {
+            width: 12px;
+            height: 12px;
+            vertical-align: middle;
         }
 
         @media screen and (max-width: 768px) {
@@ -302,8 +309,16 @@
             </button>
             <div class="memo-container" spellcheck="false">
                 <div class="font-size-controls">
-                    <button class="font-size-btn increase">A+</button>
-                    <button class="font-size-btn decrease">A-</button>
+                    <button class="font-size-btn increase">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>   
+                    </button>
+                    <button class="font-size-btn decrease">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" />
+                        </svg>
+                    </button>
                 </div>
                 <textarea class="memo-textarea" placeholder="memo..."></textarea>
             </div>
