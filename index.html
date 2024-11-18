@@ -231,6 +231,31 @@
             background-color: rgba(0, 0, 0, 0.1);
         }
 
+        .memo-container {
+            position: absolute; /* 버튼의 절대 위치 기준점 */
+        }
+
+        .font-size-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0.6;
+        }
+
+        .font-size-btn {
+            background: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .font-size-btn:hover {
+            opacity: 1;
+            background: #f0f0f0;
+        }
+
         @media screen and (max-width: 768px) {
             .container {
                 max-width: 50vw;
@@ -276,6 +301,10 @@
                 </svg>
             </button>
             <div class="memo-container" spellcheck="false">
+                <div class="font-size-controls">
+                    <button class="font-size-btn increase">A+</button>
+                    <button class="font-size-btn decrease">A-</button>
+                </div>
                 <textarea class="memo-textarea" placeholder="memo..."></textarea>
             </div>
             <div class="timer-display">
@@ -474,6 +503,32 @@
         function stopResize() {
             isResizing = false;
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const memoContainer = document.querySelector('.memo-textarea');
+            const increaseFontBtn = document.querySelector('.font-size-btn.increase');
+            const decreaseFontBtn = document.querySelector('.font-size-btn.decrease');
+            
+            // 기본 폰트 사이즈를 16px로 설정
+            let currentFontSize = 16;
+            memoContainer.style.fontSize = currentFontSize + 'px';
+
+            // 폰트 사이즈 증가 (최대 32px)
+            increaseFontBtn.addEventListener('click', function() {
+                if (currentFontSize < 32) {
+                    currentFontSize += 2;
+                    memoContainer.style.fontSize = currentFontSize + 'px';
+                }
+            });
+
+            // 폰트 사이즈 감소 (최소 12px)
+            decreaseFontBtn.addEventListener('click', function() {
+                if (currentFontSize > 12) {
+                    currentFontSize -= 2;
+                    memoContainer.style.fontSize = currentFontSize + 'px';
+                }
+            });
+        });
 
         setRandomBackground();
         startTimer();
