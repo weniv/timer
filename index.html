@@ -272,6 +272,19 @@
             height: 40px;
         }
 
+        .music-selector {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f2f4f5;
+            color: black ;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
         @media screen and (max-width: 768px) {
             .container {
                 max-width: 50vw;
@@ -310,7 +323,15 @@
         <img src="asset/img/logo.svg" alt="홈으로 가기">
     </a>
 
-    <audio id="bgMusic" src="asset/music/1.mp3" controls loop controlsList="nodownload nofullscreen noplaybackrate"></audio>
+    <audio id="bgMusic" src="asset/music/1.mp3" controls controlsList="nodownload nofullscreen noplaybackrate"></audio>
+    <select id="music-selector" class="music-selector">
+        <option value="1">음악 1</option>
+        <option value="2">음악 2</option>
+        <option value="3">음악 3</option>
+        <option value="4">음악 4</option>
+        <option value="5">음악 5</option>
+        <option value="6">음악 6</option>
+    </select>
 
     <div class="centered-container">
         <div class="container">
@@ -560,6 +581,19 @@
         setRandomBackground();
         startTimer();
 
+        document.getElementById('music-selector').addEventListener('change', function(e) {
+            const music = document.getElementById('bgMusic');
+            music.src = `asset/music/${e.target.value}.mp3`;
+            music.play();
+        });
+
+        // 음악이 종료되면 다음 음악으로 변경
+        document.getElementById('bgMusic').addEventListener('ended', function() {
+            const musicSelector = document.getElementById('music-selector');
+            const nextIndex = (musicSelector.selectedIndex + 1) % musicSelector.options.length;
+            musicSelector.selectedIndex = nextIndex;
+            musicSelector.dispatchEvent(new Event('change'));
+        });
     
     </script>
 </body>
