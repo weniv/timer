@@ -275,6 +275,13 @@
             justify-content: center;
         }
 
+        /* audio 안에 요소 중 숫자를 수직 중앙정렬 */
+        #bgMusic::-webkit-media-controls-current-time-display,
+        #bgMusic::-webkit-media-controls-time-remaining-display {
+            display: flex;
+            align-items: center;
+        }
+
         .music-selector {
             position: absolute;
             top: 70px;
